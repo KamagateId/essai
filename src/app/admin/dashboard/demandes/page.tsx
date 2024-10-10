@@ -2,32 +2,57 @@
 import React, { useState } from 'react';
 
 const Demande: React.FC = () => {
-  // États pour gérer les données du formulaire
   const [reference, setReference] = useState('');
   const [demandeur, setDemandeur] = useState('');
   const [montant, setMontant] = useState('');
+  const [typeCredit, setTypeCredit] = useState('');
+  const [statut, setStatut] = useState('');
+  
+  // Obtenir le token de l'utilisateur stocké (par exemple, dans localStorage)
+  const token = localStorage.getItem('token');
 
-  // Fonction pour gérer la soumission du formulaire
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    
-    // Logique de traitement des données (par exemple, envoi à une API)
-    console.log('Référence:', reference);
-    console.log('Demandeur:', demandeur);
-    console.log('Montant:', montant);
-    
-    // Remettre à zéro les champs après soumission
-    setReference('');
-    setDemandeur('');
-    setMontant('');
+
+    const requestBody = {
+      reference,
+      demandeur, // Correspond à la colonne "demandeurs" dans la table MySQL
+      montant,
+      typeCredit,
+      statut,
+    };
+
+    try {
+      const response = await fetch('http://localhost:3001/credits', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`, // Ajouter le token JWT dans les headers
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (response.ok) {
+        console.log('Demande de crédit soumise avec succès');
+        // Remettre à zéro les champs après soumission
+        setReference('');
+        setDemandeur('');
+        setMontant('');
+        setTypeCredit('');
+        setStatut('');
+      } else {
+        console.error('Erreur lors de la soumission de la demande');
+      }
+    } catch (error) {
+      console.error('Erreur de réseau:', error);
+    }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md w-96">
         <h2 className="text-2xl font-semibold mb-6">Formulaire de Demande de Crédit</h2>
-        
-        {/* Champ Référence */}
+
         <div className="mb-4">
           <label htmlFor="reference" className="block text-sm font-medium text-gray-700 mb-2">
             Référence
@@ -43,7 +68,6 @@ const Demande: React.FC = () => {
           />
         </div>
 
-        {/* Champ Demandeur */}
         <div className="mb-4">
           <label htmlFor="demandeur" className="block text-sm font-medium text-gray-700 mb-2">
             Demandeur (Nom de l'entreprise ou de la personne)
@@ -59,7 +83,6 @@ const Demande: React.FC = () => {
           />
         </div>
 
-        {/* Champ Montant */}
         <div className="mb-4">
           <label htmlFor="montant" className="block text-sm font-medium text-gray-700 mb-2">
             Montant (F CFA)
@@ -75,12 +98,47 @@ const Demande: React.FC = () => {
           />
         </div>
 
-        {/* Bouton de soumission */}
+        <div className="mb-4">
+          <label htmlFor="typeCredit" className="block text-sm font-medium text-gray-700 mb-2">
+            Type de Crédit
+          </label>
+          <select
+            id="typeCredit"
+            value={typeCredit}
+            onChange={(e) => setTypeCredit(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-500"
+            required
+          >
+            <option value="">Sélectionnez un type de crédit</option>
+            <option value="immobilier">Crédit Immobilier</option>
+            <option value="personnel">Crédit Personnel</option>
+            <option value="auto">Crédit Auto</option>
+          </select>
+        </div>
+
+        <div className="mb-4">
+          <label htmlFor="statut" className="block text-sm font-medium text-gray-700 mb-2">
+            Statut
+          </label>
+          <select
+            id="statut"
+            value={statut}
+            onChange={(e) => setStatut(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-blue-500"
+            required
+          >
+            <option value="">Sélectionnez un statut</option>
+            <option value="en attente">En Attente</option>
+            <option value="approuvé">Approuvé</option>
+            <option value="refusé">Refusé</option>
+          </select>
+        </div>
+
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white font-bold py-2 rounded-lg hover:bg-blue-600 transition-colors"
+          className="w-full py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-500"
         >
-          Soumettre la Demande
+          Soumettre la demande
         </button>
       </form>
     </div>
