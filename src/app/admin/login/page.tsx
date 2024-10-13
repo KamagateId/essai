@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 const Login: React.FC = () => {
@@ -8,6 +8,14 @@ const Login: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const router = useRouter();
+
+  useEffect(() => {
+    // Si un token existe dans le localStorage, l'utilisateur est déjà connecté
+    const token = localStorage.getItem('token');
+    if (token) {
+      router.replace('/admin/dashboard');
+    }
+  }, [router]);
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -27,9 +35,13 @@ const Login: React.FC = () => {
 
       if (response.ok) {
         setSuccess('Connexion réussie');
-        console.log('Utilisateur:', data.user);
-        // Redirige l'utilisateur ou fais autre chose avec les données
-        router.replace('/admin/dashboard')
+        console.log('Token:', data.token);
+
+        // Stocker le token JWT dans localStorage
+        localStorage.setItem('token', data.token);
+
+        // Rediriger vers le tableau de bord
+        router.replace('/admin/dashboard');
       } else {
         setError(data.error || 'Une erreur est survenue');
       }

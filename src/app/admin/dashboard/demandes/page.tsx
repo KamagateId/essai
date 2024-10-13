@@ -1,7 +1,9 @@
 "use client";
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const Demande: React.FC = () => {
+  const router = useRouter();
   const [reference, setReference] = useState('');
   const [demandeur, setDemandeur] = useState('');
   const [montant, setMontant] = useState('');
@@ -16,12 +18,13 @@ const Demande: React.FC = () => {
 
     const requestBody = {
       reference,
-      demandeur, // Correspond à la colonne "demandeurs" dans la table MySQL
-      montant,
+      demandeurs: demandeur, // correspond à la colonne "demandeurs" dans la table MySQL
+      montant: Number(montant), // Assurez-vous que c'est un nombre
       typeCredit,
       statut,
+      Date: new Date(),
     };
-
+    
     try {
       const response = await fetch('http://localhost:3001/credits', {
         method: 'POST',
@@ -40,6 +43,8 @@ const Demande: React.FC = () => {
         setMontant('');
         setTypeCredit('');
         setStatut('');
+        // Rediriger vers la page de liste des demandes de crédit
+        router.push('/admin/dashboard/');
       } else {
         console.error('Erreur lors de la soumission de la demande');
       }
@@ -128,9 +133,9 @@ const Demande: React.FC = () => {
             required
           >
             <option value="">Sélectionnez un statut</option>
-            <option value="en attente">En Attente</option>
-            <option value="approuvé">Approuvé</option>
-            <option value="refusé">Refusé</option>
+            <option value="En attente">En Attente</option>
+            <option value="Approuvé">Approuvé</option>
+            <option value="Refusé">Refusé</option>
           </select>
         </div>
 
